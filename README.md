@@ -26,7 +26,9 @@ pip install -r requirements.txt
 Make sure you already installed Cmake and cuda toolkit
 
 >Needed links below:
+>
 >[CUDA toolkit install guide link](https://docs.nvidia.com/cuda/cuda-installation-guide-linux/contents.html)
+>
 >[cmake install guide link](https://geeksww.com/tutorials/operating_systems/linux/installation/downloading_compiling_and_installing_cmake_on_linux.php)
 
 1. Create env vars CMAKE_ARGS and FORCE_CMAKE
