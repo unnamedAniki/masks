@@ -34,6 +34,7 @@ Make sure you already installed Cmake and cuda toolkit
 1. Create env vars CMAKE_ARGS and FORCE_CMAKE
 ```bash
 CMAKE_ARGS="-DLLAMA_CUBLAS=on"
+FORCE_CMAKE=1
 ```
 2. reinstall llama python package in venv(!!!) 
 ```bash
