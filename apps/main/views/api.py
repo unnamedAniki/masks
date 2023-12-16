@@ -24,4 +24,4 @@ async def get_model(data: Response):
     #         communication_text=result_text,
     #         accuracy=90.1
     #     ))
-    return output
+    return {'id': 1, 'answer': output, 'comment': data.body}
