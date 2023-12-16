@@ -38,15 +38,17 @@ class Model:
                                    temperature: float = 0.2,
                                    repeat_penalty: float = 1.09,
                                    text: str = ""):
+        print("current_time")
         current_time = time.time()
         ai_model = self.model
-
+        print("ai_model")
         tokens = self.get_system_tokens()
         self.model.eval(tokens)
-
+        print("get_system_tokens")
         message_tokens = self.get_message_tokens(role="user", content=text)
         role_tokens = [ai_model.token_bos(), model_settings.BOT_TOKEN, model_settings.LINEBREAK_TOKEN]
         tokens += message_tokens + role_tokens
+        print("preform_generate")
         generator = ai_model.generate(
             tokens,
             top_k=top_k,
