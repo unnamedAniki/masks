@@ -1,7 +1,7 @@
 import joblib
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-import random
+import numpy as np
 
 from apps.model.settings import model_settings
 
@@ -71,13 +71,16 @@ class Cluster:
         loaded_model = joblib.load(self.path_cluster)
         return loaded_model
 
-    def predictClust(self):
+    def predictClust(self, data):
         model = self.importModel()
-        print(model)
-        predict = model.predict(self.usersData)
+        df = pd.DataFrame(data, index=[0])
+        df.replace("", np.nan, inplace=True)
+        df.replace(0, np.nan, inplace=True)
+        predict = model.predict(data)
         return predict
 
     def preprocessData(self) -> pd.DataFrame:
+
         usersData = pd.read_excel(self.path_data)
         label_encoder = LabelEncoder()
 
@@ -217,9 +220,9 @@ class Cluster:
 
         return recommendations
 
-    def recommend_product(self, predict):
+    def recommend_product(self, data):
         recommendations = {}
-        predict = self.predictClust()
+        predict = self.predictClust(data)
         for index, prediction in enumerate(predict):
             if prediction == 0:
                 recommendations[index] = products[('PREMIUM')]
