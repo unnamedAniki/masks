@@ -4,7 +4,7 @@ from fastapi import Response
 
 from apps.main.models import ModelOutput
 from apps.run_main import app, model
-
+from apps.model.cluster import Cluster
 
 @app.get("/api/v1/main/")
 async def index(data: Response):
@@ -14,8 +14,10 @@ async def index(data: Response):
 @app.get("/api/v1/get_model/")
 async def get_model(data: Response):
     output_info = []
-    output = await model.generate_result_text(
-        text="Краткий маркетинговый текст потребительский кредит женщина средних лет")
+    prompt = await Cluster.recommend_product()
+    for key, value in prompt.items():
+        output = await model.generate_result_text(
+            text=value)
     # for client_data in data.body:
     #     # list_id, text_for_model = get_marketing_text(client_data)
     #     result_text = apps.model.main.model.generate_result_text(text_for_model)
@@ -24,4 +26,4 @@ async def get_model(data: Response):
     #         communication_text=result_text,
     #         accuracy=90.1
     #     ))
-    return {'id': 1, 'answer': output, 'comment': data.body}
+        return {'id': key, 'answer': output, 'comment': data.body}

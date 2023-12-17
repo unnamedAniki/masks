@@ -8,6 +8,7 @@ class ModelSettings(BaseSettings):
     BOT_TOKEN: int = 12435
     LINEBREAK_TOKEN: int = 13
     PATH: str = "model-q4_K.gguf"
+    PATH_cluster: str = "ClusterModel.pkl"
     ROLE_TOKENS: dict = {
         "user": USER_TOKEN,
         "bot": BOT_TOKEN,

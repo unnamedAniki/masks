@@ -72,3 +72,4 @@ def interact(
 if __name__ == "__main__":
     path = "model-q4_K.gguf"
     interact(model_path=path)
+

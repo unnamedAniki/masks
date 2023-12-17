@@ -3,7 +3,7 @@ import os.path
 import time
 from concurrent.futures import ProcessPoolExecutor
 from threading import Thread
-
+from apps.model.cluster import Cluster
 from llama_cpp import Llama
 
 from apps.model.settings import model_settings
@@ -18,8 +18,16 @@ class Model:
             n_threads=16,
             n_gpu_layers=33,
         )
+        #path_data - Путь к файле с информацией о пользователях EXCEL
+        self.clust_model = Cluster(path_data=path_data, path_cluster=model_settings.PATH_cluster)
+
+    def get_prompt(self):
+        predict = self.clust_model.predictClust()
+        products = self.clust_model.recommend_product(predict)
+        return products
 
     def get_message_tokens(self, role, content):
+
         message_tokens = self.model.tokenize(content.encode("utf-8"))
         message_tokens.insert(1, model_settings.ROLE_TOKENS[role])
         message_tokens.insert(2, model_settings.LINEBREAK_TOKEN)
