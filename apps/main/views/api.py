@@ -47,6 +47,6 @@ async def get_logs():
     return logs
 
 
-@app.post("/api/v1/check_log")
+@app.post("/api/v1/check_log/")
 async def check_log(comment_id: int, check: bool):
     logs_queries.check_model_output(check=check, id=comment_id)
