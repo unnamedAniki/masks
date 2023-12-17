@@ -3,7 +3,11 @@ import json
 
 from fastapi import Response, Body
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 
+from apps.database.db_connect import engine
+from apps.database.queries import log_queries
+from apps.database.queries.log_queries import logs_queries
 from apps.main.models import ModelOutput
 from apps.run_main import app, model
 from apps.model.cluster import Cluster
@@ -27,13 +31,16 @@ async def get_model(data=Body()):
             user_prompt['comment'] = output_text
             break
         output_info.append(user_prompt)
+
     return output_info
-    # for client_data in data.body:
-    #     # list_id, text_for_model = get_marketing_text(client_data)
-    #     result_text = apps.model.main.model.generate_result_text(text_for_model)
-    #     output_info.append(ModelOutput(
-    #         id=1,
-    #         communication_text=result_text,
-    #         accuracy=90.1
-    #     # ))
-    return output_info
+
+
+@app.get("/api/v1/get_logs/")
+async def get_logs():
+    logs = logs_queries.get_logs()
+    return logs
+
+
+@app.post("/api/v1/check_log")
+async def check_log(comment_id: int, check: bool):
+    logs_queries.check_model_output(check=check, id=comment_id)
