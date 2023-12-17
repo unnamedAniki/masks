@@ -1,109 +1,114 @@
 import joblib
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-import numpy as np
 
 from apps.model.settings import model_settings
 
+const_prompt = "Напиши рекламный текст от лица Газпромбанка, чтобы клиент "
 products = {
-    'ПК': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался классическим потребительским кредитом под маленькие проценты. Напиши лучшие рекламное предложение.',
-    'TOPUP':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался рефинансированием внутреннего потребительский кредит в Газпромбанке. Напиши лучшие рекламное предложение.',
-    'REFIN': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался рефинансированием  внешнего потребительский кредит в другом банке. Напиши лучшие рекламное предложение.',
-    'CC':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент приобрел Кредитную карту \'Мир\'Газпромбанка. Напиши лучшие рекламное предложение, расскажи о вcех ее плюсах и почему ее надо заказать.',
-    'AUTO': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Классическим автокредитом на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'AUTO_SCR': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался кредитом под залог автомобиля на лучших условиях. Напиши рекламное предложение, расскажи о всех его плюсах.',
-    'MORTG':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Ипотекой на квартиру на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'MORTG_REFIN': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался рефинансированием ипотеки на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'MORTG_SCR':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Кредитом под залог недвижимости на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'MORTG_EA':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался ипотекой с доп. условиями на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'DEPOSIT':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Депозитом лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'SAVE_ACC':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Накопительным счетом на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'DC':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался дебетовой картой на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'PREMIUM':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался премиальной картой на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'INVEST':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался брокерским и инвестиционным счетом на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'ISG':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Инвестиционным страхованием жизни на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'NSG': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Накопительным страхование жизни на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'INS_LIFE':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался страхованием жизни на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'INS_PROPERTY':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Страхование имущества на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'TRUST':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Доверительным управлением счета на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'OMS':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Обезличенным металлический счетом на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
-    'IZP': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался Индивидуальным зарплатным проектом на лучших условиях. Напиши лучшие рекламное предложение, расскажи о всех его плюсах.',
+    'ПК': 'воспользовался классическим потребительским кредитом под маленькие проценты.',
+    'TOPUP':  'воспользовался рефинансированием внутреннего потребительский кредит в Газпромбанке.',
+    'REFIN': 'воспользовался рефинансированием  внешнего потребительский кредит в другом банке.',
+    'CC':  'приобрел Кредитную карту \'Мир\'Газпромбанка.',
+    'AUTO': 'воспользовался Классическим автокредитом на лучших условиях.',
+    'AUTO_SCR': 'воспользовался кредитом под залог автомобиля на лучших условиях.',
+    'MORTG':  'воспользовался Ипотекой на квартиру на лучших условиях.',
+    'MORTG_REFIN': 'воспользовался рефинансированием ипотеки на лучших условиях.',
+    'MORTG_SCR':  'воспользовался Кредитом под залог недвижимости на лучших условиях.',
+    'MORTG_EA':  'воспользовался ипотекой с доп. условиями на лучших условиях.',
+    'DEPOSIT':  'воспользовался Депозитом лучших условиях.',
+    'SAVE_ACC':  'воспользовался Накопительным счетом на лучших условиях.',
+    'DC':  'воспользовался дебетовой картой на лучших условиях.',
+    'PREMIUM':  'воспользовался премиальной картой на лучших условиях.',
+    'INVEST':  'воспользовался брокерским и инвестиционным счетом на лучших условиях.',
+    'ISG':  'воспользовался Инвестиционным страхованием жизни на лучших условиях.',
+    'NSG': 'воспользовался Накопительным страхование жизни на лучших условиях.',
+    'INS_LIFE':  'воспользовался страхованием жизни на лучших условиях.',
+    'INS_PROPERTY':  'воспользовался Страхование имущества на лучших условиях.',
+    'TRUST':  'воспользовался Доверительным управлением счета на лучших условиях.',
+    'OMS':  'воспользовался Обезличенным металлический счетом на лучших условиях.',
+    'IZP': 'воспользовался Индивидуальным зарплатным проектом на лучших условиях.',
 }
 
 columns = ['cnt_tr_all_3m', 'cnt_tr_top_up_3m', 'cnt_tr_cash_3m', 'cnt_tr_buy_3m', 'cnt_tr_mobile_3m',
            'cnt_tr_oil_3m', 'cnt_tr_on_card_3m', 'cnt_tr_service_3m', 'cnt_zp_12m', 'sum_zp_12m',
            'max_outstanding_amount_6m', 'avg_outstanding_amount_3m', 'cnt_dep_act', 'sum_dep_now',
-           'avg_dep_avg_balance_1month', 'max_dep_avg_balance_3month', 'app_position_type_nm', 'visit_purposes',
+           'avg_dep_avg_balance_1month', 'max_dep_avg_balance_3month',
            'app_vehicle_ind', 'qnt_months_from_last_visit', 'limit_exchange_count']
+
 
 class Cluster:
     def __init__(self):
+        self.average_max_dep = None
+        self.average_max_dep = None
+        self.average_cnt_tr = None
+        self.average_cnt_tr_top = None
+        self.average_cnt_tr_cash = None
+        self.average_cnt_tr_buy = None
+        self.average_cnt_tr_mobile = None
+        self.average_cnt_tr_oil = None
+        self.average_cnt_tr_card = None
+        self.average_cnt_tr_service = None
+        self.average_cnt_zp = None
+        self.criteria = None
+        self.users_data = None
         self.path_data = model_settings.PATH_DATA
         self.path_cluster = model_settings.PATH_CLUSTER
-        self.usersData = self.preprocessData()
-        self.predictData = self.predictClust()
-        self.average_max_dep = self.usersData['max_dep_avg_balance_3month'].mean()
-        self.average_cnt_tr = self.usersData['cnt_tr_all_3m'].mean()
-        self.average_cnt_tr_top = self.usersData['cnt_tr_top_up_3m'].mean()
-        self.average_cnt_tr_cash = self.usersData['cnt_tr_cash_3m'].mean()
-        self.average_cnt_tr_buy = self.usersData['cnt_tr_buy_3m'].mean()
-        self.average_cnt_tr_mobile = self.usersData['cnt_tr_mobile_3m'].mean()
-        self.average_cnt_tr_oil = self.usersData['cnt_tr_oil_3m'].mean()
-        self.average_cnt_tr_card = self.usersData['cnt_tr_on_card_3m'].mean()
-        self.average_cnt_tr_service = self.usersData['cnt_tr_service_3m'].mean()
-        self.average_cnt_zp = self.usersData['cnt_zp_12m'].mean()
-        self.criteria = {
-            'TMO': ((self.usersData['age'] > 30) & (self.usersData['age'] < 70) & (self.usersData['cnt_tr_all_3m'] > 10)),
-            'SMS': ((self.usersData['age'] > 20) & (self.usersData['age'] < 55) & (self.usersData['sum_zp_12m'] > 100000)),
-            'PUSH': ((self.usersData['age'] > 20) & (self.usersData['age'] < 55) & (
-                        self.usersData['max_outstanding_amount_6m'] == 0)),
-            'EMAIL': ((self.usersData['age'] > 30) & (self.usersData['age'] < 55) & (self.usersData['app_vehicle_ind'] == 1)),
-            'MOB_BANNER': ((self.usersData['age'] > 20) & (self.usersData['age'] < 30) & (
-                    self.usersData['qnt_months_from_last_visit'] < 3)),
-            'OFFICE_BANNER': ((self.usersData['age'] > 20) & (self.usersData['age'] < 70) & (
-                    self.usersData['qnt_months_from_last_visit'] < 4)),
-            'MOBILE_CHAT': (
-                        (self.usersData['age'] > 20) & (self.usersData['age'] < 30) & (self.usersData['cnt_tr_service_3m'] > 0)),
-            'KND': ((self.usersData['age'] > 20) & (self.usersData['age'] < 30) & (self.usersData['cnt_tr_buy_3m'] > 0)),
-        }
+        self.import_model = joblib.load(self.path_cluster)
 
-    def importModel(self):
-        loaded_model = joblib.load(self.path_cluster)
-        return loaded_model
-
-    def predictClust(self, data):
-        model = self.importModel()
-        df = pd.DataFrame(data, index=[0])
-        df.replace("", np.nan, inplace=True)
-        df.replace(0, np.nan, inplace=True)
-        predict = model.predict(data)
-        return predict
-
-    def preprocessData(self) -> pd.DataFrame:
-
-        usersData = pd.read_excel(self.path_data)
+    def preprocess_data(self, data) -> pd.DataFrame:
+        users_data = pd.read_json(data)
         label_encoder = LabelEncoder()
-
-        usersData['reg_region_nm'] = label_encoder.fit_transform(usersData['reg_region_nm'])
-        usersData['visit_purposes'] = label_encoder.fit_transform(usersData['visit_purposes'])
-        usersData['app_position_type_nm'] = label_encoder.fit_transform(usersData['app_position_type_nm'])
-
-        usersData['gender'].fillna(-1, inplace=True)
+        users_data['super_clust'] = label_encoder.fit_transform(users_data['super_clust'])
+        users_data['reg_region_nm'] = label_encoder.fit_transform(users_data['reg_region_nm'])
+        users_data['visit_purposes'] = label_encoder.fit_transform(users_data['visit_purposes'])
+        users_data['app_position_type_nm'] = label_encoder.fit_transform(users_data['app_position_type_nm'])
+        users_data['age'].fillna(-1, inplace=True)
+        users_data['gender'].fillna(-1, inplace=True)
 
         for column in columns:
-            mean_value = usersData[column].mean()
-            usersData[column].fillna(mean_value, inplace=True)
+            mean_value = users_data[column].mean()
+            users_data[column].fillna(mean_value, inplace=True)
 
-        return usersData
+        self.average_max_dep = users_data['max_dep_avg_balance_3month'].mean()
+        self.average_cnt_tr = users_data['cnt_tr_all_3m'].mean()
+        self.average_cnt_tr_top = users_data['cnt_tr_top_up_3m'].mean()
+        self.average_cnt_tr_cash = users_data['cnt_tr_cash_3m'].mean()
+        self.average_cnt_tr_buy = users_data['cnt_tr_buy_3m'].mean()
+        self.average_cnt_tr_mobile = users_data['cnt_tr_mobile_3m'].mean()
+        self.average_cnt_tr_oil = users_data['cnt_tr_oil_3m'].mean()
+        self.average_cnt_tr_card = users_data['cnt_tr_on_card_3m'].mean()
+        self.average_cnt_tr_service = users_data['cnt_tr_service_3m'].mean()
+        self.average_cnt_zp = users_data['cnt_zp_12m'].mean()
+        self.criteria = {
+            'TMO': ((users_data['age'] > 30) & (users_data['age'] < 70) & (
+                        users_data['cnt_tr_all_3m'] > 10)),
+            'SMS': ((users_data['age'] > 20) & (users_data['age'] < 55) & (
+                        users_data['sum_zp_12m'] > 100000)),
+            'PUSH': ((users_data['age'] > 20) & (users_data['age'] < 55) & (
+                    users_data['max_outstanding_amount_6m'] == 0)),
+            'EMAIL': ((users_data['age'] > 30) & (users_data['age'] < 55) & (
+                        users_data['app_vehicle_ind'] == 1)),
+            'MOB_BANNER': ((users_data['age'] > 20) & (users_data['age'] < 30) & (
+                    users_data['qnt_months_from_last_visit'] < 3)),
+            'OFFICE_BANNER': ((users_data['age'] > 20) & (users_data['age'] < 70) & (
+                    users_data['qnt_months_from_last_visit'] < 4)),
+            'MOBILE_CHAT': (
+                    (users_data['age'] > 20) & (users_data['age'] < 30) & (
+                        users_data['cnt_tr_service_3m'] > 0)),
+            'KND': ((users_data['age'] > 20) & (users_data['age'] < 30) & (
+                        users_data['cnt_tr_buy_3m'] > 0)),
+        }
+        return users_data
 
     def generateChannel(self):
-        channel_assignments = {channel: self.usersData[self.criteria[channel]].index.tolist() for channel in self.criteria}
+        channel_assignments = {channel: self.users_data[self.criteria[channel]].index.tolist() for channel in self.criteria}
         return channel_assignments
 
-
-    def generatePrompt(self):
+    def generatePrompt(self, json_data):
+        self.users_data = self.preprocess_data(data=json_data)
         recommendations = {}
-        for index, row in self.usersData.iterrows():
+        for index, row in self.users_data.iterrows():
             client_age = row['age']
             client_region = row['reg_region_nm']
 
@@ -138,7 +143,7 @@ class Cluster:
                         row['max_outstanding_amount_6m'] > 0 or row['avg_outstanding_amount_3m'] > 0)):
                     product_append.append(product)
 
-                if (product == 'MORTG_EA' and row['reg_region_nm'] in ['Якутия', 'Бурятия', 'Забайкальский край',
+                if (product == 'MORTG_EA' and client_region in ['Якутия', 'Бурятия', 'Забайкальский край',
                                                                        'Приморский край', 'Камчатский край',
                                                                        'Хабаровский край', 'Магаданская область',
                                                                        'Амурская область', 'Сахалинская область',
@@ -216,48 +221,10 @@ class Cluster:
 
                 if len(product_append) > 0:
                     for i in result_array:
-                        recommendations.setdefault(index, []).append(i)
+                        recommendations.setdefault(index, []).append(products[i])
 
         return recommendations
 
-    def recommend_product(self, data):
-        recommendations = {}
-        predict = self.predictClust(data)
-        for index, prediction in enumerate(predict):
-            if prediction == 0:
-                recommendations[index] = products[('PREMIUM')]
-
-            elif prediction == 1:
-                recommendations[index] = products[('TOPUP')]
-
-            elif prediction == 2:
-                recommendations[index] = products[('ПК')]
-
-            elif prediction == 3:
-                recommendations[index] = products[('DC')]
-
-            elif prediction == 4:
-                recommendations[index] = products[('TRUST')]
-
-            elif prediction == 5:
-                recommendations[index] = products[('DEPOSIT')]
-
-            elif prediction == 6:
-                recommendations[index] = products[('AUTO')]
-
-            elif prediction == 7:
-                recommendations[index] = products[('IZP')]
-
-            elif prediction == 8:
-                recommendations[index] = products[('MORTG_REFIN')]
-
-            elif prediction == 9:
-                recommendations[index] = products[('DEPOSIT')]
-
-            elif prediction == 10:
-                recommendations[index] = products[('DC')]
-
-        return recommendations
 
 
 
