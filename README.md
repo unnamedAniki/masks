@@ -2,7 +2,7 @@
 <h3 align="center">Хакатон ЛЦТ. Кейс от Газпромбанк Тех</h3>
 
 ### Как запустить сервер локально
-
+https://mrx1078.github.io/digital/ <br>
 <b>Setup</b>
 1. Clone repository
 ```bash
