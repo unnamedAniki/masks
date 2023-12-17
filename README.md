@@ -1,4 +1,7 @@
-Gazprombank AI-chat for hackaton
+<h1 align="center">Сервис для генерации персональных маркетинговых предложений</h1>
+<h3 align="center">Хакатон ЛЦТ. Кейс от Газпромбанк Тех</h3>
+
+### Как запустить сервер локально
 
 <b>Setup</b>
 1. Clone repository
