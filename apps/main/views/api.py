@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from apps.database.db_connect import engine
+from apps.database.model import ModelLogs
 from apps.database.queries import log_queries
 from apps.database.queries.log_queries import logs_queries
 from apps.main.models import ModelOutput
@@ -30,6 +31,11 @@ async def get_model(data=Body()):
             output_text = await model.generate_result_text(text=text)
             user_prompt['comment'] = output_text
             break
+        model_log = ModelLogs(
+            user_prompt=user_prompt['comment'],
+            user_id=user_prompt['id']
+        )
+        logs_queries.add_comment(model_log)
         output_info.append(user_prompt)
 
     return output_info
