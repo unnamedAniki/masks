@@ -3,6 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 import random
 
+from apps.model.settings import model_settings
+
 products = {
     'ПК': 'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался классическим потребительским кредитом под маленькие проценты. Напиши лучшие рекламное предложение.',
     'TOPUP':  'Напиши рекламный текст от лица Газпромбанка, чтобы клиент воспользовался рефинансированием внутреннего потребительский кредит в Газпромбанке. Напиши лучшие рекламное предложение.',
@@ -29,16 +31,15 @@ products = {
 }
 
 columns = ['cnt_tr_all_3m', 'cnt_tr_top_up_3m', 'cnt_tr_cash_3m', 'cnt_tr_buy_3m', 'cnt_tr_mobile_3m',
-               'cnt_tr_oil_3m', 'cnt_tr_on_card_3m', 'cnt_tr_service_3m', 'cnt_zp_12m', 'sum_zp_12m',
-               'max_outstanding_amount_6m', 'avg_outstanding_amount_3m', 'cnt_dep_act', 'sum_dep_now',
-               'avg_dep_avg_balance_1month', 'max_dep_avg_balance_3month', 'app_position_type_nm', 'visit_purposes',
-               'app_vehicle_ind', 'qnt_months_from_last_visit', 'limit_exchange_count']
+           'cnt_tr_oil_3m', 'cnt_tr_on_card_3m', 'cnt_tr_service_3m', 'cnt_zp_12m', 'sum_zp_12m',
+           'max_outstanding_amount_6m', 'avg_outstanding_amount_3m', 'cnt_dep_act', 'sum_dep_now',
+           'avg_dep_avg_balance_1month', 'max_dep_avg_balance_3month', 'app_position_type_nm', 'visit_purposes',
+           'app_vehicle_ind', 'qnt_months_from_last_visit', 'limit_exchange_count']
 
 class Cluster:
-
-    def __init__(self, path_data: str, path_cluster: str):
-        self.path_data = path_data
-        self.path_cluster = path_cluster
+    def __init__(self):
+        self.path_data = model_settings.PATH_DATA
+        self.path_cluster = model_settings.PATH_CLUSTER
         self.usersData = self.preprocessData()
         self.predictData = self.predictClust()
         self.average_max_dep = self.usersData['max_dep_avg_balance_3month'].mean()
@@ -75,7 +76,6 @@ class Cluster:
         print(model)
         predict = model.predict(self.usersData)
         return predict
-
 
     def preprocessData(self) -> pd.DataFrame:
         usersData = pd.read_excel(self.path_data)
@@ -219,7 +219,7 @@ class Cluster:
 
     def recommend_product(self, predict):
         recommendations = {}
-
+        predict = self.predictClust()
         for index, prediction in enumerate(predict):
             if prediction == 0:
                 recommendations[index] = products[('PREMIUM')]

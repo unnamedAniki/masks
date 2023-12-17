@@ -19,7 +19,7 @@ class Model:
             n_gpu_layers=33,
         )
         #path_data - Путь к файле с информацией о пользователях EXCEL
-        self.clust_model = Cluster(path_data=path_data, path_cluster=model_settings.PATH_cluster)
+        self.clust_model = Cluster()
 
     def get_prompt(self):
         predict = self.clust_model.predictClust()

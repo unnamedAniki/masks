@@ -7,8 +7,9 @@ class ModelSettings(BaseSettings):
     USER_TOKEN: int = 2188
     BOT_TOKEN: int = 12435
     LINEBREAK_TOKEN: int = 13
+    PATH_DATA: str = "Dataset_Yakutia2.xlsx"
     PATH: str = "model-q4_K.gguf"
-    PATH_cluster: str = "ClusterModel.pkl"
+    PATH_CLUSTER: str = "ClusterModel.pkl"
     ROLE_TOKENS: dict = {
         "user": USER_TOKEN,
         "bot": BOT_TOKEN,
